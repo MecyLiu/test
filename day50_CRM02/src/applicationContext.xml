@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+	<!-- 引入properties配置 文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+	<!-- Hibernate配置 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driver}"></property>
+		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="user" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<!-- 必配 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 通过hibernateProperties(代替选配部分) -->
+		<property name="hibernateProperties">
+			<map>
+				<entry key="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"></entry>
+				<entry key="hibernate.show_sql" value="true"></entry>
+				<entry key="hibernate.format_sql" value="true"></entry>
+				<entry key="hibernate.hbm2ddl.auto" value="update"></entry>
+			</map>
+		</property>
+		<!-- 通过mappingDirectoryLocations(代替映射文件的路径 带/) -->
+		<property name="mappingDirectoryLocations" value="classpath:com/itheima/bean"></property>
+	</bean>
+	
+	<!-- Spring配置 -->
+		<!-- 开启注解扫描 -->
+		<context:component-scan base-package="com.itheima"></context:component-scan>
+		<!-- 配置事务 -->
+		<!-- 配置事务管理器 -->
+		<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+			<!-- 需要session工厂,配置session工厂 -->
+			<property name="sessionFactory" ref="sessionFactory"></property>
+		</bean>
+		<!-- 开启事务注解-->
+		<tx:annotation-driven transaction-manager="transactionManager"/>
+		
+	<!-- 模块配置 -->
+	<!-- 用户模块 -->
+	<bean id="userAction" class="com.itheima.web.action.UserAction" scope="prototype">
+		<property name="userService" ref="userService"></property>
+	</bean>
+	<bean id="userService" class="com.itheima.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDao"></property>
+	</bean>
+	<bean id="userDao" class="com.itheima.dao.impl.UserDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<!-- 客户模块 -->
+	<bean id="customerAction" class="com.itheima.web.action.CustomerAction" scope="prototype">
+		<property name="customerService" ref="customerService"></property>
+	</bean>
+	<bean id="customerService" class="com.itheima.service.impl.CustomerServiceImpl">
+		<property name="customerdao" ref="customerDao"></property>
+	</bean>
+	<bean id="customerDao" class="com.itheima.dao.impl.CustomerDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<!-- 字典数据注册 -->
+	<bean id="baseDictAction" class="com.itheima.web.action.BaseDictAction" scope="prototype">
+		<property name="baseDictService" ref="baseDictService"></property>
+	</bean>
+	<bean id="baseDictService" class="com.itheima.service.impl.BaseDictServiceImpl">
+		<property name="baseDictDao" ref="baseDictDao"></property>
+	</bean>
+	<bean id="baseDictDao" class="com.itheima.dao.impl.BaseDictDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<!-- 联系人模块 -->
+	<bean id="linkManAction" class="com.itheima.web.action.LinkManAction" scope="prototype">
+		<property name="linkManService" ref="linkManService"></property>
+	</bean>
+	<bean id="linkManService" class="com.itheima.service.impl.LinkManServiceImpl">
+		<property name="linkMandao" ref="linkManDao"></property>
+	</bean>
+	<bean id="linkManDao" class="com.itheima.dao.impl.LinkManDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<!-- 客户拜访模块 -->
+	<bean id="saleVisitAction" class="com.itheima.web.action.SaleVisitAction" scope="prototype">
+		<property name="saleVisitService" ref="saleVisitService"></property>
+	</bean>
+	<bean id="saleVisitService" class="com.itheima.service.impl.SaleVisitServiceImpl">
+		<property name="saleVisitDao" ref="saleVisitDao"></property>
+	</bean>
+	<bean id="saleVisitDao" class="com.itheima.dao.impl.SaleVisitDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+</beans>
